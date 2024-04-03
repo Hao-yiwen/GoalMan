@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.yiwen.goalman.R
 import com.yiwen.goalman.model.Goal
+import java.util.UUID
 
 
 @Composable
@@ -41,7 +42,7 @@ fun GoalList(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var currentGoal by remember {
-        mutableStateOf(Goal(0, "", 0))
+        mutableStateOf(Goal(UUID.randomUUID().toString(), "", 0))
     }
 
     Column(modifier) {

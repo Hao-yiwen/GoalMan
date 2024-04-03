@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class GoalListViewModel(val goalRepositoryProvider: GoalRepository) : ViewModel() {
     val _uiState = MutableStateFlow(GoalListUiState())
@@ -40,7 +41,7 @@ class GoalListViewModel(val goalRepositoryProvider: GoalRepository) : ViewModel(
     fun addGoal(description: String) {
         val currentGoals = _uiState.value.goals
         // 第三个参数 status 为 1 表示目标正在进行中
-        val newGoal = Goal(currentGoals.size + 1, description, 1)
+        val newGoal = Goal(UUID.randomUUID().toString(), description, 1)
         _uiState.value = _uiState.value.copy(
             goals = currentGoals + newGoal
         )
