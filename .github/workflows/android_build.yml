@@ -2,8 +2,8 @@ name: Android CI
 
 on:
     push:
-      branches:
-        - master
+      tags:
+        - 'v*'  # 当推送符合 'v*' 格式的标签时触发  
 
 jobs:
   build:
@@ -30,8 +30,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
   
