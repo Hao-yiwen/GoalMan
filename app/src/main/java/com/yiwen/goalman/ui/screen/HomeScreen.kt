@@ -32,16 +32,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yiwen.goalman.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: GoalListViewModel = GoalListViewModel()) {
-    val goalUiState: GoalListUiState = viewModel.uiState.collectAsState().value
+fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewModel.factory)) {
+    val goalUiState by viewModel.uiState.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
+    // @description: 协成作用域
     val scope = rememberCoroutineScope()
+
     var showBottomSheet by remember { mutableStateOf(false) }
     var newGoalDescription by remember { mutableStateOf("") }
 
@@ -58,7 +61,12 @@ fun HomeScreen(viewModel: GoalListViewModel = GoalListViewModel()) {
             Icon(imageVector = Icons.Filled.Add, contentDescription = null)
         }
     }) {
-        GoalList(Modifier.padding(it), goalUiState.goals, viewModel)
+        GoalList(
+            Modifier.padding(it),
+            goalUiState.goals,
+            viewModel::updateGoal,
+            viewModel::deleteGoal
+        )
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -77,6 +85,7 @@ fun HomeScreen(viewModel: GoalListViewModel = GoalListViewModel()) {
                         .padding(16.dp)
                 )
                 Button(
+                    enabled = newGoalDescription.isNotBlank(),
                     onClick = {
                         // 添加新目标逻辑
                         if (newGoalDescription.isNotBlank()) {
