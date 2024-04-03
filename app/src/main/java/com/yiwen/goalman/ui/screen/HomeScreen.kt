@@ -30,9 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.yiwen.goalman.BuildConfig
 import com.yiwen.goalman.R
 import kotlinx.coroutines.launch
 
@@ -115,10 +117,18 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
 fun HomeScreenTopBar() {
     CenterAlignedTopAppBar(title = {
         Row {
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = MaterialTheme.typography.displayLarge
-            )
+            if (BuildConfig.DEBUG) {
+                Text(
+                    text = stringResource(id = R.string.title_name) + "(DEBUG)",
+                    style = MaterialTheme.typography.displayLarge
+                )
+            } else {
+                Text(
+                    text = stringResource(id = R.string.title_name),
+                    style = MaterialTheme.typography.displayLarge
+                )
+            }
+
         }
     }, colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.primary))
 }
