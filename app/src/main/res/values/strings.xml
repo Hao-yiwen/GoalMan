@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">目标达人</string>
+    <string name="process">进行中</string>
+    <string name="complete">已完成</string>
 </resources>
