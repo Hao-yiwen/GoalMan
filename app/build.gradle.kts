@@ -71,6 +71,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${libs.versions.lifecycleRuntimeKtx}")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    // workManager
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

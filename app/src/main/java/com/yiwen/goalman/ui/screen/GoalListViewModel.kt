@@ -10,14 +10,16 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.yiwen.goalman.GoalApplication
 import com.yiwen.goalman.data.GoalRepository
 import com.yiwen.goalman.data.GoalRepositoryProvider
+import com.yiwen.goalman.data.GoalSettingRepository
 import com.yiwen.goalman.model.Goal
+import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-class GoalListViewModel(val goalRepositoryProvider: GoalRepository) : ViewModel() {
+class GoalListViewModel(val goalRepositoryProvider: GoalRepository,val goalSettingRepository: GoalSettingRepository ) : ViewModel() {
     val _uiState = MutableStateFlow(GoalListUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -35,6 +37,12 @@ class GoalListViewModel(val goalRepositoryProvider: GoalRepository) : ViewModel(
             _uiState.value = _uiState.value.copy(
                 goals = gl
             )
+        }
+    }
+
+    fun reSettingGoal() {
+        viewModelScope.launch {
+            goalSettingRepository.reSettingGoal()
         }
     }
 
@@ -82,7 +90,7 @@ class GoalListViewModel(val goalRepositoryProvider: GoalRepository) : ViewModel(
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GoalApplication)
-                GoalListViewModel(application.container.goalRepository)
+                GoalListViewModel(application.container.goalRepository, application.container.workManagerRepository)
             }
         }
     }

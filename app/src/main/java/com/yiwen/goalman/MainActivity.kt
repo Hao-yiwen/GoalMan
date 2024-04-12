@@ -1,5 +1,6 @@
 package com.yiwen.goalman
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,5 +28,24 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_POST_NOTIFICATIONS) {
+            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                // 权限被授予，可以发送通知
+            } else {
+                // 权限请求被拒绝，解释为什么需要这个权限，并可能引导用户打开应用的设置界面
+            }
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CODE_POST_NOTIFICATIONS = 101 // 选择一个唯一的整数
     }
 }

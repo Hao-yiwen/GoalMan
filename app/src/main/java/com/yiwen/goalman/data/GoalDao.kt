@@ -31,4 +31,7 @@ interface GoalDao {
 
     @Query("SELECT * FROM goal WHERE id = :id")
     suspend fun getGoalById(id: Int): Goal
+
+    @Query("UPDATE goal SET status = 1")
+    suspend fun updateStatus()
 }
