@@ -17,6 +17,8 @@ interface GoalRepository {
     suspend fun getAllGoals(): List<Goal>
 
     suspend fun getGoalById(id: Int): Goal
+
+    suspend fun updateStatus(): Unit
 }
 
 class GoalRepositoryProvider(val goalDao: GoalDao) : GoalRepository {
@@ -46,5 +48,9 @@ class GoalRepositoryProvider(val goalDao: GoalDao) : GoalRepository {
 
     override suspend fun getGoalById(id: Int): Goal {
         return goalDao.getGoalById(id)
+    }
+
+    override suspend fun updateStatus() {
+        goalDao.updateStatus()
     }
 }

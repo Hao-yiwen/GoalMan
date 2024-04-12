@@ -3,4 +3,6 @@
     <string name="title_name">每日目标</string>
     <string name="process">进行中</string>
     <string name="complete">已完成</string>
+    <string name="setting">设置</string>
+    <string name="reset">每晚12点重置目标。</string>
 </resources>
