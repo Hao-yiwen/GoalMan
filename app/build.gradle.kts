@@ -10,10 +10,12 @@ android {
 
     defaultConfig {
         applicationId = "com.yiwen.goalman"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,6 +37,8 @@ android {
         }
     }
     compileOptions {
+        // Enable support for the new language APIs
+//        coreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -73,6 +77,10 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${libs.versions.lifecycleRuntimeKtx}")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // calendar
+    implementation("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("com.kizitonwose.calendar:compose:2.5.0")
 
     // workManager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
