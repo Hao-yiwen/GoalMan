@@ -44,15 +44,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kizitonwose.calendar.compose.HeatMapCalendar
 import com.kizitonwose.calendar.compose.HorizontalCalendar
+import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarState
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.yiwen.goalman.BuildConfig
 import com.yiwen.goalman.MainActivity
 import com.yiwen.goalman.R
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.YearMonth
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -77,11 +81,11 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
     val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() } // Available from the library
 
-    val state = rememberCalendarState(
+    val state = rememberHeatMapCalendarState(
         startMonth = startMonth,
-        endMonth = endMonth,
+        endMonth = startMonth,
         firstVisibleMonth = currentMonth,
-        firstDayOfWeek = firstDayOfWeek
+        firstDayOfWeek = firstDayOfWeek,
     )
 
     LaunchedEffect(Unit) {
@@ -109,10 +113,12 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
                 viewModel::updateGoal,
                 viewModel::deleteGoal
             )
-            HorizontalCalendar(
+            HeatMapCalendar(
                 state = state,
-                dayContent = { Day(it) },
-                modifier = Modifier.background(Color.Blue)
+                dayContent = { day, _ -> Day(day) },
+                weekHeader = { WeekHeader(it) },
+                monthHeader = { MonthHeader(it) },
+
             )
         }
         if (showBottomSheet) {
@@ -156,6 +162,15 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
             }
         }
     }
+}
+
+@Composable
+fun MonthHeader(day: CalendarMonth) {
+}
+
+@Composable
+fun WeekHeader(day: DayOfWeek) {
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
