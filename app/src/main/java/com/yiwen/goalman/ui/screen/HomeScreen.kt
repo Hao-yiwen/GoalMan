@@ -8,11 +8,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -31,7 +34,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,25 +44,39 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kizitonwose.calendar.compose.CalendarLayoutInfo
 import com.kizitonwose.calendar.compose.HeatMapCalendar
 import com.kizitonwose.calendar.compose.HorizontalCalendar
+import com.kizitonwose.calendar.compose.heatmapcalendar.HeatMapCalendarState
+import com.kizitonwose.calendar.compose.heatmapcalendar.HeatMapWeek
 import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarState
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import com.kizitonwose.calendar.core.yearMonth
 import com.yiwen.goalman.BuildConfig
+import com.yiwen.goalman.Enum.Level
 import com.yiwen.goalman.MainActivity
 import com.yiwen.goalman.R
+import com.yiwen.goalman.utils.displayText
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.YearMonth
+
+private val daySize = 18.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,17 +95,12 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
     val appContext = context.applicationContext
 
     // calendar test
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
-    val endMonth = remember { currentMonth.plusMonths(100) } // Adjust as needed
-    val firstDayOfWeek = remember { firstDayOfWeekFromLocale() } // Available from the library
-
-    val state = rememberHeatMapCalendarState(
-        startMonth = startMonth,
-        endMonth = startMonth,
-        firstVisibleMonth = currentMonth,
-        firstDayOfWeek = firstDayOfWeek,
-    )
+    var refreshKey by remember { mutableIntStateOf(1) }
+    val endDate = remember { LocalDate.now() }
+    // GitHub only shows contributions for the past 12 months
+    val startDate = remember { endDate.minusMonths(12) }
+    val data = remember { mutableStateOf<Map<LocalDate, Level>>(emptyMap()) }
+    var selection by remember { mutableStateOf<Pair<LocalDate, Level>?>(null) }
 
     LaunchedEffect(Unit) {
         requestPermissons(context = appContext, activityContext = context)
@@ -107,6 +121,13 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
         }
     }) {
         Column {
+            val state = rememberHeatMapCalendarState(
+                startMonth = startDate.yearMonth,
+                endMonth = endDate.yearMonth,
+                firstVisibleMonth = endDate.yearMonth,
+                firstDayOfWeek = firstDayOfWeekFromLocale(),
+            )
+
             GoalList(
                 Modifier.padding(it),
                 goalUiState.goals,
@@ -114,11 +135,22 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
                 viewModel::deleteGoal
             )
             HeatMapCalendar(
+                modifier = Modifier.padding(vertical = 10.dp),
                 state = state,
-                dayContent = { day, _ -> Day(day) },
+                contentPadding = PaddingValues(end = 6.dp),
+                dayContent = { day, week ->
+                    Day(
+                        day = day,
+                        startDate = startDate,
+                        endDate = endDate,
+                        week = week,
+                        level = data.value[day.date] ?: Level.Zero,
+                    ) { clicked ->
+                        selection = Pair(clicked, data.value[clicked] ?: Level.Zero)
+                    }
+                },
                 weekHeader = { WeekHeader(it) },
-                monthHeader = { MonthHeader(it) },
-
+                monthHeader = { MonthHeader(it, endDate, state) },
             )
         }
         if (showBottomSheet) {
@@ -165,12 +197,100 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
 }
 
 @Composable
-fun MonthHeader(day: CalendarMonth) {
+private fun MonthHeader(
+    calendarMonth: CalendarMonth,
+    endDate: LocalDate,
+    state: HeatMapCalendarState,
+) {
+    val density = LocalDensity.current
+    val firstFullyVisibleMonth by remember {
+        // Find the first index with at most one box out of bounds.
+        derivedStateOf { getMonthWithYear(state.layoutInfo, daySize, density) }
+    }
+    if (calendarMonth.weekDays.first().first().date <= endDate) {
+        val month = calendarMonth.yearMonth
+        val title = if (month == firstFullyVisibleMonth) {
+            month.displayText(short = true)
+        } else {
+            month.month.displayText()
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 1.dp, start = 2.dp),
+        ) {
+            Text(text = title, fontSize = 10.sp)
+        }
+    }
+}
+
+private fun getMonthWithYear(
+    layoutInfo: CalendarLayoutInfo,
+    daySize: Dp,
+    density: Density,
+): YearMonth? {
+    val visibleItemsInfo = layoutInfo.visibleMonthsInfo
+    return when {
+        visibleItemsInfo.isEmpty() -> null
+        visibleItemsInfo.count() == 1 -> visibleItemsInfo.first().month.yearMonth
+        else -> {
+            val firstItem = visibleItemsInfo.first()
+            val daySizePx = with(density) { daySize.toPx() }
+            if (
+                firstItem.size < daySizePx * 3 || // Ensure the Month + Year text can fit.
+                firstItem.offset < layoutInfo.viewportStartOffset && // Ensure the week row size - 1 is visible.
+                (layoutInfo.viewportStartOffset - firstItem.offset > daySizePx)
+            ) {
+                visibleItemsInfo[1].month.yearMonth
+            } else {
+                firstItem.month.yearMonth
+            }
+        }
+    }
 }
 
 @Composable
-fun WeekHeader(day: DayOfWeek) {
+private fun WeekHeader(dayOfWeek: DayOfWeek) {
+    Box(
+        modifier = Modifier
+            .height(daySize) // Must set a height on the day of week so it aligns with the day.
+            .padding(horizontal = 4.dp),
+    ) {
+        Text(
+            text = dayOfWeek.displayText(),
+            modifier = Modifier.align(Alignment.Center),
+            fontSize = 10.sp,
+        )
+    }
+}
 
+@Composable
+private fun Day(
+    day: CalendarDay,
+    startDate: LocalDate,
+    endDate: LocalDate,
+    week: HeatMapWeek,
+    level: Level,
+    onClick: (LocalDate) -> Unit,
+) {
+    val weekDates = week.days.map { it.date }
+    if (day.date in startDate..endDate) {
+        LevelBox(level.color) { onClick(day.date) }
+    } else if (weekDates.contains(startDate)) {
+        LevelBox(Color.Transparent)
+    }
+}
+
+@Composable
+private fun LevelBox(color: Color, onClick: (() -> Unit)? = null) {
+    Box(
+        modifier = Modifier
+            .size(daySize) // Must set a size on the day.
+            .padding(2.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color = color)
+            .clickable(enabled = onClick != null) { onClick?.invoke() },
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
