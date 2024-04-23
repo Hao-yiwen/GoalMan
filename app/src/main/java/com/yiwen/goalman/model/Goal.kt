@@ -16,6 +16,7 @@ import java.util.UUID
 data class Goal(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @NotNull val description: String,
-    @NotNull val status: Int
+    @NotNull val status: Int,
+    @NotNull val createdTime: Long = System.currentTimeMillis()
 )
 
