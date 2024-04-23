@@ -6,6 +6,8 @@ interface AppContainer {
     val goalRepository: GoalRepository
 
     val workManagerRepository: GoalSettingRepository
+
+    val completionRecordsRepository: CompletionRecordsRepository
 }
 
 class AppDataContainer(val context: Context) : AppContainer {
@@ -16,5 +18,12 @@ class AppDataContainer(val context: Context) : AppContainer {
     override val workManagerRepository: GoalSettingRepository by lazy {
         WorkManagerGolalSettingRepository(context)
     }
+
+    override val completionRecordsRepository: CompletionRecordsRepository by lazy {
+        CompletionRecordsReposityProvider(
+            GoalDatabase.getDatabase(context).completionRecordsDao()
+        )
+    }
+
 
 }

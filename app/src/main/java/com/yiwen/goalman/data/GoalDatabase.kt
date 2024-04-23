@@ -6,15 +6,21 @@ import androidx.room.DatabaseConfiguration
 import androidx.room.InvalidationTracker
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteOpenHelper
+import com.yiwen.goalman.model.CompletionRecord
 import com.yiwen.goalman.model.Goal
+import com.yiwen.goalman.utils.SqliteConverts
 
 
-@Database(entities = [Goal::class], version = 2, exportSchema = false)
+@Database(entities = [Goal::class, CompletionRecord::class], version = 3, exportSchema = false)
+@TypeConverters(SqliteConverts::class)
 abstract class GoalDatabase : RoomDatabase() {
     abstract fun goalDao(): GoalDao
 
-    companion object{
+    abstract fun completionRecordsDao(): CompletionRecordsDao
+
+    companion object {
         @Volatile
         private var Instance: GoalDatabase? = null
 

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -48,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -329,25 +332,21 @@ fun HomeScreenTopBar(viewModel: GoalListViewModel) {
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.primary),
-//        actions = {
-//            Box(
-//                modifier = Modifier
-//                    .background(Color.Transparent)
-//                    .padding(16.dp)
-//            ) {
-//                Text(
-//                    text = stringResource(id = R.string.setting),
-//                    style = MaterialTheme.typography.displayMedium,
-//                    color = MaterialTheme.colorScheme.onPrimary,
-//                    modifier = Modifier.clickable(
-//                        onClick = {
-//                            requestPermissons(context = appContext, activityContext = context)
-//                            viewModel.reSettingGoal()
-//                        }
-//                    )
-//                )
-//            }
-//        }
+        actions = {
+            Box(
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .padding(16.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.check_in),
+                    contentDescription = "打开",
+                    modifier = Modifier
+                        .width(34.dp)
+                        .height(34.dp)
+                )
+            }
+        }
     )
 }
 

@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.yiwen.goalman.GoalApplication
+import com.yiwen.goalman.data.CompletionRecordsRepository
+import com.yiwen.goalman.data.CompletionRecordsReposityProvider
 import com.yiwen.goalman.data.GoalRepository
 import com.yiwen.goalman.data.GoalRepositoryProvider
 import com.yiwen.goalman.data.GoalSettingRepository
@@ -19,7 +21,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-class GoalListViewModel(val goalRepositoryProvider: GoalRepository,val goalSettingRepository: GoalSettingRepository ) : ViewModel() {
+class GoalListViewModel(
+    val goalRepositoryProvider: GoalRepository,
+    val goalSettingRepository: GoalSettingRepository,
+    val completionRecordsReposityProvider: CompletionRecordsRepository
+) : ViewModel() {
     val _uiState = MutableStateFlow(GoalListUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -72,7 +78,7 @@ class GoalListViewModel(val goalRepositoryProvider: GoalRepository,val goalSetti
         }
     }
 
-    fun deleteGoal(goal: Goal){
+    fun deleteGoal(goal: Goal) {
         val currentGoals = _uiState.value.goals
         val index = currentGoals.indexOfFirst { it.id == goal.id }
         val newGoals = currentGoals.toMutableList()
@@ -90,7 +96,11 @@ class GoalListViewModel(val goalRepositoryProvider: GoalRepository,val goalSetti
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GoalApplication)
-                GoalListViewModel(application.container.goalRepository, application.container.workManagerRepository)
+                GoalListViewModel(
+                    application.container.goalRepository,
+                    application.container.workManagerRepository,
+                    application.container.completionRecordsRepository
+                )
             }
         }
     }
