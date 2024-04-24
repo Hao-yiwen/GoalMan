@@ -1,5 +1,6 @@
 package com.yiwen.goalman.ui.screen
 
+import android.util.Log
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -7,18 +8,22 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.yiwen.goalman.Enum.GoalStatus
+import com.yiwen.goalman.GOAL_PERCENTAGE
 import com.yiwen.goalman.GoalApplication
 import com.yiwen.goalman.data.CompletionRecordsRepository
 import com.yiwen.goalman.data.CompletionRecordsReposityProvider
 import com.yiwen.goalman.data.GoalRepository
 import com.yiwen.goalman.data.GoalRepositoryProvider
 import com.yiwen.goalman.data.GoalSettingRepository
+import com.yiwen.goalman.model.CompletionRecord
 import com.yiwen.goalman.model.Goal
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.sql.Date
 import java.util.UUID
 
 class GoalListViewModel(
@@ -82,12 +87,53 @@ class GoalListViewModel(
         val currentGoals = _uiState.value.goals
         val index = currentGoals.indexOfFirst { it.id == goal.id }
         val newGoals = currentGoals.toMutableList()
-        newGoals.removeAt(index)
+        newGoals[index] = newGoals[index].copy(status = 3)
         _uiState.value = _uiState.value.copy(
             goals = newGoals
         )
         viewModelScope.launch(Dispatchers.IO) {
-            goalRepositoryProvider.deleteGoal(goal)
+            goalRepositoryProvider.deleteGoal(goal.id)
+        }
+    }
+
+    fun checkIn() {
+        viewModelScope.launch {
+            Log.d("GoalListViewModel", _uiState.value.goals.toString())
+            val currentGoals = _uiState.value.goals
+            if (currentGoals.size > 0) {
+                // 判断是否达到打卡条件，当前目标完成状态为 2 的目标数量大于总目标数量的 60% 时，可以进行打卡
+                val positivieGoals =
+                    currentGoals.filter { it.status == GoalStatus.COMPLETED.value }?.size!! >= Math.ceil(
+                        currentGoals.size * GOAL_PERCENTAGE
+                    )
+                // 判断今天是否已经打过卡了
+                val todayCheckIn =
+                    completionRecordsReposityProvider.getCompletionRecordByCompletionTime(
+                        Date(System.currentTimeMillis())
+                    )
+                if (positivieGoals && todayCheckIn.isEmpty()) {
+                    val completionRecords = currentGoals.map {
+                        CompletionRecord(
+                            id = UUID.randomUUID().toString(),
+                            goalId = it.id,
+                            completionTime = Date(System.currentTimeMillis())
+                        )
+                    }
+                    completionRecordsReposityProvider.insertAll(completionRecords)
+                } else if (!positivieGoals) {
+                    _uiState.value = _uiState.value.copy(
+                        snackbarHostState = _uiState.value.snackbarHostState.apply {
+                            showSnackbar("未完成当日目标的60%以上,无法完成打卡")
+                        }
+                    )
+                } else if (todayCheckIn.isNotEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        snackbarHostState = _uiState.value.snackbarHostState.apply {
+                            showSnackbar("今日已经打过卡了")
+                        }
+                    )
+                }
+            }
         }
     }
 

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface GoalRepository {
     fun insertGoal(goal: Goal)
 
-    fun deleteGoal(goal: Goal)
+    fun deleteGoal(id: String)
 
     fun updateGoal(goal: Goal)
 
@@ -26,8 +26,8 @@ class GoalRepositoryProvider(val goalDao: GoalDao) : GoalRepository {
         goalDao.insert(goal)
     }
 
-    override fun deleteGoal(goal: Goal) {
-        goalDao.delete(goal)
+    override fun deleteGoal(id: String) {
+        goalDao.delete(id)
     }
 
     override fun updateGoal(goal: Goal) {

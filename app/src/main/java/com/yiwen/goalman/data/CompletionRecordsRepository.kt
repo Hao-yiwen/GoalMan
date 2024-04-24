@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.Flow
 interface CompletionRecordsRepository {
     fun insert(completionRecord: CompletionRecord): Unit
 
-    fun insertAll(vararg completionRecords: CompletionRecord): Unit
+    fun insertAll(vararg completionRecords: List<CompletionRecord>): Unit
 
     fun delete(completionRecord: CompletionRecord): Unit
 
-    fun deleteAll(vararg completionRecords: CompletionRecord): Unit
+    fun deleteAll(vararg completionRecords: List<CompletionRecord>): Unit
 
     fun update(completionRecord: CompletionRecord): Unit
 
@@ -18,9 +18,9 @@ interface CompletionRecordsRepository {
 
     suspend fun getAllCompletionRecords(): List<CompletionRecord>
 
-    fun getCompletionRecordByCompletionTimeFlow(completionTime: java.sql.Date): Flow<CompletionRecord>
+    fun getCompletionRecordByCompletionTimeFlow(completionTime: java.sql.Date): Flow<List<CompletionRecord>>
 
-    suspend fun getCompletionRecordByCompletionTime(completionTime: java.sql.Date): CompletionRecord
+    suspend fun getCompletionRecordByCompletionTime(completionTime: java.sql.Date): List<CompletionRecord>
 
     fun getCompletionRecordByGoalIdFlow(goalId: String): Flow<List<CompletionRecord>>
 
@@ -36,7 +36,7 @@ class CompletionRecordsReposityProvider(val completionRecordsDao: CompletionReco
         completionRecordsDao.insert(completionRecord)
     }
 
-    override fun insertAll(vararg completionRecords: CompletionRecord) {
+    override fun insertAll(vararg completionRecords: List<CompletionRecord>) {
         completionRecordsDao.insertAll(*completionRecords)
     }
 
@@ -44,7 +44,7 @@ class CompletionRecordsReposityProvider(val completionRecordsDao: CompletionReco
         completionRecordsDao.delete(completionRecord)
     }
 
-    override fun deleteAll(vararg completionRecords: CompletionRecord) {
+    override fun deleteAll(vararg completionRecords: List<CompletionRecord>) {
         completionRecordsDao.deleteAll(*completionRecords)
     }
 
@@ -60,11 +60,11 @@ class CompletionRecordsReposityProvider(val completionRecordsDao: CompletionReco
         return completionRecordsDao.getAllCompletionRecords()
     }
 
-    override fun getCompletionRecordByCompletionTimeFlow(completionTime: java.sql.Date): Flow<CompletionRecord> {
+    override fun getCompletionRecordByCompletionTimeFlow(completionTime: java.sql.Date): Flow<List<CompletionRecord>> {
         return completionRecordsDao.getCompletionRecordByCompletionTimeFlow(completionTime)
     }
 
-    override suspend fun getCompletionRecordByCompletionTime(completionTime: java.sql.Date): CompletionRecord {
+    override suspend fun getCompletionRecordByCompletionTime(completionTime: java.sql.Date): List<CompletionRecord> {
         return completionRecordsDao.getCompletionRecordByCompletionTime(completionTime)
     }
 

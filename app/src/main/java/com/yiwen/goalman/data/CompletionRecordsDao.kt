@@ -15,13 +15,13 @@ interface CompletionRecordsDao {
     fun insert(completionRecord: CompletionRecord): Unit
 
     @Insert
-    fun insertAll(vararg completionRecords: CompletionRecord): Unit
+    fun insertAll(vararg completionRecords: List<CompletionRecord>): Unit
 
     @Delete
     fun delete(completionRecord: CompletionRecord): Unit
 
     @Delete
-    fun deleteAll(vararg completionRecords: CompletionRecord): Unit
+    fun deleteAll(vararg completionRecords: List<CompletionRecord>): Unit
 
     @Update
     fun update(completionRecord: CompletionRecord): Unit
@@ -33,10 +33,10 @@ interface CompletionRecordsDao {
     suspend fun getAllCompletionRecords(): List<CompletionRecord>
 
     @Query("SELECT * FROM completion_records WHERE completionTime = :completionTime")
-    fun getCompletionRecordByCompletionTimeFlow(completionTime: Date): Flow<CompletionRecord>
+    fun getCompletionRecordByCompletionTimeFlow(completionTime: Date): Flow<List<CompletionRecord>>
 
     @Query("SELECT * FROM completion_records WHERE completionTime = :completionTime")
-    suspend fun getCompletionRecordByCompletionTime(completionTime: Date): CompletionRecord
+    suspend fun getCompletionRecordByCompletionTime(completionTime: Date): List<CompletionRecord>
 
     @Query("SELECT * FROM completion_records WHERE goalId = :goalId")
     fun getCompletionRecordByGoalIdFlow(goalId: String): Flow<List<CompletionRecord>>
