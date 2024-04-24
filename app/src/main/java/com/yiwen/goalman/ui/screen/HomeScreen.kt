@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -72,14 +73,15 @@ import com.yiwen.goalman.BuildConfig
 import com.yiwen.goalman.Enum.Level
 import com.yiwen.goalman.MainActivity
 import com.yiwen.goalman.R
+import com.yiwen.goalman.ui.screen.Calendar.Day
+import com.yiwen.goalman.ui.screen.Calendar.MonthHeader
+import com.yiwen.goalman.ui.screen.Calendar.WeekHeader
 import com.yiwen.goalman.utils.displayText
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
-
-private val daySize = 18.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,19 +112,22 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
         viewModel.reSettingGoal()
     }
 
-    Scaffold(topBar = {
-        HomeScreenTopBar(viewModel)
-    }, floatingActionButton = {
-        FloatingActionButton(
-            onClick = {
-                showBottomSheet = true
-            },
-            modifier = Modifier
-                .padding(30.dp)
-        ) {
-            Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-        }
-    }) {
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = goalUiState.snackbarHostState)
+        }, topBar = {
+            HomeScreenTopBar(viewModel)
+        }, floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    showBottomSheet = true
+                },
+                modifier = Modifier
+                    .padding(30.dp)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+            }
+        }) {
         Column {
             val state = rememberHeatMapCalendarState(
                 startMonth = startDate.yearMonth,
@@ -199,114 +204,7 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
     }
 }
 
-@Composable
-private fun MonthHeader(
-    calendarMonth: CalendarMonth,
-    endDate: LocalDate,
-    state: HeatMapCalendarState,
-) {
-    val density = LocalDensity.current
-    val firstFullyVisibleMonth by remember {
-        // Find the first index with at most one box out of bounds.
-        derivedStateOf { getMonthWithYear(state.layoutInfo, daySize, density) }
-    }
-    if (calendarMonth.weekDays.first().first().date <= endDate) {
-        val month = calendarMonth.yearMonth
-        val title = if (month == firstFullyVisibleMonth) {
-            month.displayText(short = true)
-        } else {
-            month.month.displayText()
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 1.dp, start = 2.dp),
-        ) {
-            Text(text = title, fontSize = 10.sp)
-        }
-    }
-}
 
-private fun getMonthWithYear(
-    layoutInfo: CalendarLayoutInfo,
-    daySize: Dp,
-    density: Density,
-): YearMonth? {
-    val visibleItemsInfo = layoutInfo.visibleMonthsInfo
-    return when {
-        visibleItemsInfo.isEmpty() -> null
-        visibleItemsInfo.count() == 1 -> visibleItemsInfo.first().month.yearMonth
-        else -> {
-            val firstItem = visibleItemsInfo.first()
-            val daySizePx = with(density) { daySize.toPx() }
-            if (
-                firstItem.size < daySizePx * 3 || // Ensure the Month + Year text can fit.
-                firstItem.offset < layoutInfo.viewportStartOffset && // Ensure the week row size - 1 is visible.
-                (layoutInfo.viewportStartOffset - firstItem.offset > daySizePx)
-            ) {
-                visibleItemsInfo[1].month.yearMonth
-            } else {
-                firstItem.month.yearMonth
-            }
-        }
-    }
-}
-
-@Composable
-private fun WeekHeader(dayOfWeek: DayOfWeek) {
-    Box(
-        modifier = Modifier
-            .height(daySize) // Must set a height on the day of week so it aligns with the day.
-            .padding(horizontal = 4.dp),
-    ) {
-        Text(
-            text = dayOfWeek.displayText(),
-            modifier = Modifier.align(Alignment.Center),
-            fontSize = 10.sp,
-        )
-    }
-}
-
-@Composable
-private fun Day(
-    day: CalendarDay,
-    startDate: LocalDate,
-    endDate: LocalDate,
-    week: HeatMapWeek,
-    level: Level,
-    onClick: (LocalDate) -> Unit,
-) {
-    val weekDates = week.days.map { it.date }
-    if (day.date in startDate..endDate) {
-        LevelBox(level.color) { onClick(day.date) }
-    } else if (weekDates.contains(startDate)) {
-        LevelBox(Color.Transparent)
-    }
-}
-
-@Composable
-private fun LevelBox(color: Color, onClick: (() -> Unit)? = null) {
-    Box(
-        modifier = Modifier
-            .size(daySize) // Must set a size on the day.
-            .padding(2.dp)
-            .clip(RoundedCornerShape(2.dp))
-            .background(color = color)
-            .clickable(enabled = onClick != null) { onClick?.invoke() },
-    )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun Day(day: CalendarDay) {
-    Box(
-        modifier = Modifier
-            .aspectRatio(1f), // This is important for square sizing!
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = day.date.dayOfMonth.toString())
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -340,10 +238,13 @@ fun HomeScreenTopBar(viewModel: GoalListViewModel) {
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.check_in),
-                    contentDescription = "打开",
+                    contentDescription = "打卡",
                     modifier = Modifier
                         .width(34.dp)
                         .height(34.dp)
+                        .clickable {
+                            viewModel.checkIn()
+                        }
                 )
             }
         }

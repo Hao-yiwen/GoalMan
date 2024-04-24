@@ -14,8 +14,8 @@ interface GoalDao {
     @Insert
     fun insert(goal: Goal): Unit
 
-    @Delete
-    fun delete(goal: Goal): Unit
+    @Query("UPDATE goal SET status = 3 WHERE id = :id")
+    fun delete(id: String): Unit
 
     @Update
     fun update(goal: Goal): Unit
