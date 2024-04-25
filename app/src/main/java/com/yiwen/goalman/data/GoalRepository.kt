@@ -1,5 +1,6 @@
 package com.yiwen.goalman.data
 
+import androidx.room.Query
 import com.yiwen.goalman.model.Goal
 import kotlinx.coroutines.flow.Flow
 
@@ -15,6 +16,14 @@ interface GoalRepository {
     fun getGoalByIdFlow(id: Int): Flow<Goal>
 
     suspend fun getAllGoals(): List<Goal>
+
+    suspend fun getAllPositiveGoals(): List<Goal>
+
+    fun getAllPositiveGoalsFlow(): Flow<List<Goal>>
+
+    fun getGoalsByUpdateTimeFlow(date: String): Flow<List<Goal>>
+
+    fun getGoalsByUpdateTime(date: String): List<Goal>
 
     suspend fun getGoalById(id: Int): Goal
 
@@ -44,6 +53,22 @@ class GoalRepositoryProvider(val goalDao: GoalDao) : GoalRepository {
 
     override suspend fun getAllGoals(): List<Goal> {
         return goalDao.getAllGoals()
+    }
+
+    override suspend fun getAllPositiveGoals(): List<Goal> {
+        return goalDao.getAllPositiveGoals()
+    }
+
+    override fun getAllPositiveGoalsFlow(): Flow<List<Goal>> {
+        return goalDao.getAllPositiveGoalsFlow()
+    }
+
+    override fun getGoalsByUpdateTimeFlow(date: String): Flow<List<Goal>> {
+        return goalDao.getGoalsByUpdateTimeFlow(date)
+    }
+
+    override fun getGoalsByUpdateTime(date: String): List<Goal> {
+        return goalDao.getGoalsByUpdateTime(date)
     }
 
     override suspend fun getGoalById(id: Int): Goal {

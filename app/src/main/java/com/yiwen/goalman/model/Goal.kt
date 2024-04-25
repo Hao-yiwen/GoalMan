@@ -3,6 +3,7 @@ package com.yiwen.goalman.model
 import androidx.compose.runtime.mutableStateOf
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.yiwen.goalman.utils.getNowDate
 import org.jetbrains.annotations.NotNull
 import java.util.UUID
 
@@ -19,7 +20,7 @@ data class Goal(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @NotNull val description: String,
     @NotNull val status: Int,
-    @NotNull val createdTime: Long = System.currentTimeMillis()
-
+    @NotNull val createdTime: String = getNowDate(),
+    @NotNull val updatedTime: String = getNowDate()
 )
 

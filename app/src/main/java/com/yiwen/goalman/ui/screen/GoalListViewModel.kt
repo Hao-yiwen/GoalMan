@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.yiwen.goalman.Enum.GoalStatus
+import com.yiwen.goalman.Enum.Level
 import com.yiwen.goalman.GOAL_PERCENTAGE
 import com.yiwen.goalman.GoalApplication
 import com.yiwen.goalman.data.CompletionRecordsRepository
@@ -18,12 +19,18 @@ import com.yiwen.goalman.data.GoalRepositoryProvider
 import com.yiwen.goalman.data.GoalSettingRepository
 import com.yiwen.goalman.model.CompletionRecord
 import com.yiwen.goalman.model.Goal
+import com.yiwen.goalman.utils.RecordComplianceRate
+import com.yiwen.goalman.utils.getNowDate
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.sql.Date
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class GoalListViewModel(
@@ -38,12 +45,13 @@ class GoalListViewModel(
     init {
         viewModelScope.launch {
             processGoalList()
+            getHeatMapCalendarData()
         }
     }
 
     fun processGoalList() {
         viewModelScope.launch {
-            val gl = goalRepositoryProvider.getAllGoals().toMutableStateList()
+            val gl = goalRepositoryProvider.getAllPositiveGoals().toMutableStateList()
 
             _uiState.value = _uiState.value.copy(
                 goals = gl
@@ -60,7 +68,7 @@ class GoalListViewModel(
     fun addGoal(description: String) {
         val currentGoals = _uiState.value.goals
         // 第三个参数 status 为 1 表示目标正在进行中
-        val newGoal = Goal(UUID.randomUUID().toString(), description, 1)
+        val newGoal = Goal(UUID.randomUUID().toString(), description, 1, getNowDate(), getNowDate())
         _uiState.value = _uiState.value.copy(
             goals = currentGoals + newGoal
         )
@@ -96,40 +104,118 @@ class GoalListViewModel(
         }
     }
 
+    fun getHeatMapCalendarData(
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val startDate = _uiState.value.startDate
+            val endDate = _uiState.value.endDate
+            val results = mutableMapOf<LocalDate, Level>()
+            val records = completionRecordsReposityProvider.getCompletionRecordsByDateRange(
+                getNowDate(startDate),
+                getNowDate(endDate)
+            ).groupBy { it.completionTime }
+
+            // 假设 records 是 Map<LocalDate, List<Record>>
+            (0..ChronoUnit.DAYS.between(startDate, endDate)).forEach { count ->
+                val date = startDate.plusDays(count)
+                val dailyRecords = records.get(getNowDate(date)) ?: emptyList()
+
+                if (dailyRecords.isEmpty()) {
+                    results[date] = Level.Zero
+                } else {
+                    val recordComplianceRate = RecordComplianceRate(dailyRecords)
+                    val levelIndex = Math.floor(recordComplianceRate * 4).toInt()
+                    results[date] = Level.values()[levelIndex]
+                }
+            }
+
+            _uiState.value = _uiState.value.copy(
+                date = results
+            )
+        }
+    }
+
+
     fun checkIn() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Log.d("GoalListViewModel", _uiState.value.goals.toString())
-            val currentGoals = _uiState.value.goals
+            // 获取今天的目标
+            val currentGoals = goalRepositoryProvider.getGoalsByUpdateTime(getNowDate());
+            val positiveGoals = currentGoals.filter { it.status != GoalStatus.UNAVAILABLE.value }
+            val negativeGoals = currentGoals.filter { it.status == GoalStatus.UNAVAILABLE.value }
             if (currentGoals.size > 0) {
                 // 判断是否达到打卡条件，当前目标完成状态为 2 的目标数量大于总目标数量的 60% 时，可以进行打卡
                 val positivieGoals =
                     currentGoals.filter { it.status == GoalStatus.COMPLETED.value }?.size!! >= Math.ceil(
-                        currentGoals.size * GOAL_PERCENTAGE
+                        positiveGoals.size * GOAL_PERCENTAGE
                     )
                 // 判断今天是否已经打过卡了
                 val todayCheckIn =
                     completionRecordsReposityProvider.getCompletionRecordByCompletionTime(
-                        Date(System.currentTimeMillis())
+                        getNowDate()
                     )
-                if (positivieGoals && todayCheckIn.isEmpty()) {
-                    val completionRecords = currentGoals.map {
+                if (positivieGoals) {
+                    val completionRecords = positiveGoals.map {
                         CompletionRecord(
                             id = UUID.randomUUID().toString(),
                             goalId = it.id,
-                            completionTime = Date(System.currentTimeMillis())
+                            completionTime = getNowDate(),
+                            status = it.status
                         )
                     }
-                    completionRecordsReposityProvider.insertAll(completionRecords)
+                    if (todayCheckIn.size > 0) {
+                        // 更新打卡内容
+                        coroutineScope {
+                            // 更新有意义的打卡记录
+                            completionRecords.forEach {
+                                val index =
+                                    todayCheckIn.indexOfFirst { record -> record.goalId == it.goalId }
+                                if (index >= 0) {
+                                    // 如果存在则更新
+                                    launch {
+                                        completionRecordsReposityProvider.update(
+                                            it.copy(
+                                                id = todayCheckIn[index].id
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // 否则就插入
+                                    launch {
+                                        completionRecordsReposityProvider.insert(it)
+                                    }
+                                }
+                            }
+                            // 删除无意义的打卡记录
+                            negativeGoals.forEach {
+                                val index =
+                                    todayCheckIn.indexOfFirst { record -> record.goalId == it.id }
+                                if (index >= 0) {
+                                    launch {
+                                        completionRecordsReposityProvider.delete(todayCheckIn[index])
+                                    }
+                                }
+                            }
+                        }
+                        getHeatMapCalendarData()
+                        _uiState.value = _uiState.value.copy(
+                            snackbarHostState = _uiState.value.snackbarHostState.apply {
+                                showSnackbar("更新打卡成功~")
+                            }
+                        )
+                    } else {
+                        completionRecordsReposityProvider.insertAll(*completionRecords.toTypedArray())
+                        getHeatMapCalendarData()
+                        _uiState.value = _uiState.value.copy(
+                            snackbarHostState = _uiState.value.snackbarHostState.apply {
+                                showSnackbar("打卡成功~")
+                            }
+                        )
+                    }
                 } else if (!positivieGoals) {
                     _uiState.value = _uiState.value.copy(
                         snackbarHostState = _uiState.value.snackbarHostState.apply {
                             showSnackbar("未完成当日目标的60%以上,无法完成打卡")
-                        }
-                    )
-                } else if (todayCheckIn.isNotEmpty()) {
-                    _uiState.value = _uiState.value.copy(
-                        snackbarHostState = _uiState.value.snackbarHostState.apply {
-                            showSnackbar("今日已经打过卡了")
                         }
                     )
                 }

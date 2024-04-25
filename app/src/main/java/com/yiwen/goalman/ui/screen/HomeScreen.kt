@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -76,12 +77,14 @@ import com.yiwen.goalman.R
 import com.yiwen.goalman.ui.screen.Calendar.Day
 import com.yiwen.goalman.ui.screen.Calendar.MonthHeader
 import com.yiwen.goalman.ui.screen.Calendar.WeekHeader
-import com.yiwen.goalman.utils.displayText
 import com.yiwen.goalman.work.requestPermissons
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,10 +104,10 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
 
     // calendar test
     var refreshKey by remember { mutableIntStateOf(1) }
-    val endDate = remember { LocalDate.now() }
-    // GitHub only shows contributions for the past 12 months
-    val startDate = remember { endDate.minusMonths(12) }
-    val data = remember { mutableStateOf<Map<LocalDate, Level>>(emptyMap()) }
+//    val goalUiState.endDate = remember { LocalDate.now() }
+//    // 展示最近6个月的数据
+//    val goalUiState.startDate = remember { goalUiState.endDate.minusMonths(6) }
+//    val data = remember { mutableStateOf<Map<LocalDate, Level>>(emptyMap()) }
     var selection by remember { mutableStateOf<Pair<LocalDate, Level>?>(null) }
 
     LaunchedEffect(Unit) {
@@ -130,36 +133,56 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
         }) {
         Column {
             val state = rememberHeatMapCalendarState(
-                startMonth = startDate.yearMonth,
-                endMonth = endDate.yearMonth,
-                firstVisibleMonth = endDate.yearMonth,
+                startMonth = goalUiState.startDate.yearMonth,
+                endMonth = goalUiState.endDate.yearMonth,
+                firstVisibleMonth = goalUiState.endDate.yearMonth,
                 firstDayOfWeek = firstDayOfWeekFromLocale(),
             )
-
-            GoalList(
-                Modifier.padding(it),
-                goalUiState.goals,
-                viewModel::updateGoal,
-                viewModel::deleteGoal
+            Text(
+                text = "目标完成情况",
+                modifier = Modifier
+                    .padding(
+                        start = 20.dp,
+                        top = it.calculateTopPadding(),
+                        end = 20.dp,
+                        bottom = 10.dp
+                    )
+                    .padding(top = 10.dp),
+                style = MaterialTheme.typography.displayMedium
             )
             HeatMapCalendar(
-                modifier = Modifier.padding(vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 10.dp),
                 state = state,
                 contentPadding = PaddingValues(end = 6.dp),
                 dayContent = { day, week ->
                     Day(
                         day = day,
-                        startDate = startDate,
-                        endDate = endDate,
+                        startDate = goalUiState.startDate,
+                        endDate = goalUiState.endDate,
                         week = week,
-                        level = data.value[day.date] ?: Level.Zero,
+                        level = goalUiState.date[day.date] ?: Level.Zero,
                     ) { clicked ->
-                        selection = Pair(clicked, data.value[clicked] ?: Level.Zero)
+                        selection = Pair(clicked, goalUiState.date[clicked] ?: Level.Zero)
                     }
                 },
                 weekHeader = { WeekHeader(it) },
-                monthHeader = { MonthHeader(it, endDate, state) },
+                monthHeader = { MonthHeader(it, goalUiState.endDate, state) },
             )
+            GoalList(
+                modifier = Modifier.padding(vertical = 10.dp),
+                goalUiState.goals,
+                viewModel::updateGoal,
+                viewModel::deleteGoal
+            )
+            Box(modifier = Modifier.weight(1f)) {
+                BottomContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .align(Alignment.BottomCenter),
+                    selection = selection,
+                ) { refreshKey += 1 }
+            }
         }
         if (showBottomSheet) {
             ModalBottomSheet(
@@ -203,7 +226,6 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
         }
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
