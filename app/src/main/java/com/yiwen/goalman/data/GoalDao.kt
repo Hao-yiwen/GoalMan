@@ -26,12 +26,26 @@ interface GoalDao {
     @Query("SELECT * FROM goal")
     suspend fun getAllGoals(): List<Goal>
 
+    @Query("SELECT * FROM goal WHERE status != 3")
+    suspend fun getAllPositiveGoals(): List<Goal>
+
+    @Query("SELECT * FROM goal WHERE status != 3")
+    fun getAllPositiveGoalsFlow(): Flow<List<Goal>> {
+        return getAllGoalsFlow()
+    }
+
     @Query("SELECT * FROM goal WHERE id = :id")
     fun getGoalByIdFlow(id: Int): Flow<Goal>
+
+    @Query("SELECT * FROM goal WHERE updatedTime = :date")
+    fun getGoalsByUpdateTimeFlow(date: String): Flow<List<Goal>>
+
+    @Query("SELECT * FROM goal WHERE updatedTime = :date")
+    fun getGoalsByUpdateTime(date: String): List<Goal>
 
     @Query("SELECT * FROM goal WHERE id = :id")
     suspend fun getGoalById(id: Int): Goal
 
-    @Query("UPDATE goal SET status = 1")
+    @Query("UPDATE goal SET status = 1 WHERE status = 2")
     suspend fun updateStatus()
 }

@@ -1,7 +1,7 @@
 package com.yiwen.goalman.Enum
 
 enum class GoalStatus(val value: Int) {
-    COMPLETED(1),
-    UNCOMPLETED(2),
+    UNCOMPLETED(1),
+    COMPLETED(2),
     UNAVAILABLE(3)
 }

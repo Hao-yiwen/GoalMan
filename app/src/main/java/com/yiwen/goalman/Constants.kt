@@ -15,7 +15,7 @@ const val REQUEST_CODE = 0
 const val NOTIFICATION_ID = 1
 
 // 设置打卡完成需要的百分比
-const val GOAL_PERCENTAGE: Double = 0.6
+const val GOAL_PERCENTAGE: Double = 0.25
 
 // 热力图的宽高
 val DAYSIZE = 18.dp

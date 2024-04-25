@@ -24,7 +24,9 @@ data class CompletionRecord(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     @NotNull val goalId: String,
     // 这块需要存储记录是哪一天
-    @NotNull val completionTime: Date = Date(System.currentTimeMillis()),
+    @NotNull val completionTime: String,
+    // @description 1表示未完成 2表示完成
+    @NotNull val status: Int,
 )
 
 fun main() {

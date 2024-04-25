@@ -13,8 +13,9 @@ import com.yiwen.goalman.model.Goal
 import com.yiwen.goalman.utils.SqliteConverts
 
 
-@Database(entities = [Goal::class, CompletionRecord::class], version = 3, exportSchema = false)
-@TypeConverters(SqliteConverts::class)
+@Database(entities = [Goal::class, CompletionRecord::class], version = 4, exportSchema = false)
+// 日期直接存储字符串
+//@TypeConverters(SqliteConverts::class)
 abstract class GoalDatabase : RoomDatabase() {
     abstract fun goalDao(): GoalDao
 
