@@ -33,6 +33,8 @@ interface CompletionRecordsRepository {
         startDate: String,
         endDate: String
     ): List<CompletionRecord>
+
+    suspend fun getTotalPositiveCompletionRecords(): Int
 }
 
 class CompletionRecordsReposityProvider(val completionRecordsDao: CompletionRecordsDao) :
@@ -86,5 +88,9 @@ class CompletionRecordsReposityProvider(val completionRecordsDao: CompletionReco
         endDate: String
     ): List<CompletionRecord> {
         return completionRecordsDao.getCompletionRecordsByDateRange(startDate, endDate)
+    }
+
+    override suspend fun getTotalPositiveCompletionRecords(): Int {
+        return completionRecordsDao.getTotalPositiveCompletionRecords()
     }
 }

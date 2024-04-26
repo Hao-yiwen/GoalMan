@@ -53,4 +53,12 @@ interface CompletionRecordsDao {
 
     @Query("SELECT * FROM completion_records WHERE goalId = :goalId")
     suspend fun getCompletionRecordByGoalId(goalId: String): List<CompletionRecord>
+
+    @Query(
+        "SELECT  COUNT(*) as total\n" +
+                "FROM completion_records\n" +
+                "WHERE status = 2\n" +
+                "GROUP BY completionTime;"
+    )
+    suspend fun getTotalPositiveCompletionRecords(): Int
 }
