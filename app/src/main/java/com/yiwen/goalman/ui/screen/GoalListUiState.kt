@@ -12,4 +12,5 @@ data class GoalListUiState(
     val date: MutableMap<LocalDate, Level> = mutableMapOf(),
     val startDate: LocalDate = LocalDate.now().minusMonths(6),
     val endDate: LocalDate = LocalDate.now(),
+    val positiveDays: Int = 0,
 )

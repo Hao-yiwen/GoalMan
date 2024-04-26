@@ -44,7 +44,11 @@ class GoalListViewModel(
 
     init {
         viewModelScope.launch {
+            // 获取目标列表
             processGoalList()
+            // 获取已打卡天数
+            getPositiveDays()
+            // 获取热力图数据
             getHeatMapCalendarData()
         }
     }
@@ -215,11 +219,21 @@ class GoalListViewModel(
                 } else if (!positivieGoals) {
                     _uiState.value = _uiState.value.copy(
                         snackbarHostState = _uiState.value.snackbarHostState.apply {
-                            showSnackbar("未完成当日目标的60%以上,无法完成打卡")
+                            showSnackbar("未完成当日目标的${GOAL_PERCENTAGE * 100}%以上,无法完成打卡")
                         }
                     )
                 }
             }
+        }
+    }
+
+
+    fun getPositiveDays() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val positiveDays = completionRecordsReposityProvider.getTotalPositiveCompletionRecords()
+            _uiState.value = _uiState.value.copy(
+                positiveDays = positiveDays
+            )
         }
     }
 

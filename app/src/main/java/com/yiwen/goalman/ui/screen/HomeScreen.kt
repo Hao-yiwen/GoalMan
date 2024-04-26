@@ -119,7 +119,7 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
         snackbarHost = {
             SnackbarHost(hostState = goalUiState.snackbarHostState)
         }, topBar = {
-            HomeScreenTopBar(viewModel)
+            HomeScreenTopBar(viewModel, goalUiState)
         }, floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -230,7 +230,7 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenTopBar(viewModel: GoalListViewModel) {
+fun HomeScreenTopBar(viewModel: GoalListViewModel, goalUiState: GoalListUiState) {
     val context = LocalContext.current
     val appContext = context.applicationContext
 
@@ -239,12 +239,15 @@ fun HomeScreenTopBar(viewModel: GoalListViewModel) {
             Row {
                 if (BuildConfig.DEBUG) {
                     Text(
-                        text = stringResource(id = R.string.title_name) + "(DEBUG)",
+                        text = stringResource(
+                            id = R.string.title_name,
+                            goalUiState.positiveDays
+                        ) + "(DEBUG)",
                         style = MaterialTheme.typography.displayLarge
                     )
                 } else {
                     Text(
-                        text = stringResource(id = R.string.title_name),
+                        text = stringResource(id = R.string.title_name, goalUiState.positiveDays),
                         style = MaterialTheme.typography.displayLarge
                     )
                 }
