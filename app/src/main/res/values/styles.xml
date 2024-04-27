@@ -3,6 +3,7 @@
     <style name="Widget.GoalMan.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
         <item name="android:background">?android:attr/colorBackground</item>
+        <item name="android:padding">0dp</item>
     </style>
 
     <style name="Widget.GoalMan.AppWidget.InnerView" parent="android:Widget">

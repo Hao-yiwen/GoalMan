@@ -223,6 +223,13 @@ class GoalListViewModel(
                         }
                     )
                 }
+            } else {
+                Log.d("GoalListViewModel", "currentGoals:" + currentGoals.toString())
+                _uiState.value = _uiState.value.copy(
+                    snackbarHostState = _uiState.value.snackbarHostState.apply {
+                        showSnackbar("还没有设置目标哦~")
+                    }
+                )
             }
         }
     }
