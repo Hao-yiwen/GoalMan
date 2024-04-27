@@ -1,19 +1,34 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.GoalMan.AppWidget.Container"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:theme="@style/Theme.GoalMan.AppWidgetContainer">
+    android:id="@+id/goalman_widget_container"
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/appwidget_text"
-        style="@style/Widget.GoalMan.AppWidget.InnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
-</RelativeLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/flower_78" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#00000000"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:scaleType="fitXY"
+        android:theme="@style/Theme.GoalMan.AppWidgetContainer">
+
+        <TextView
+            android:id="@+id/appwidget_text"
+            style="@style/Widget.GoalMan.AppWidget.InnerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="#00000000"
+            android:textColor="@color/white"
+            android:contentDescription="@string/appwidget_text"
+            android:text="您已打卡0天"
+            android:textSize="20sp" />
+    </LinearLayout>
+</FrameLayout>

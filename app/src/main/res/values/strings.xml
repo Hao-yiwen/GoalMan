@@ -5,7 +5,7 @@
     <string name="complete">已完成</string>
     <string name="setting">设置</string>
     <string name="reset">每晚12点重置目标。</string>
-    <string name="appwidget_text">EXAMPLE</string>
-    <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">This is an app widget description</string>
+    <string name="appwidget_text">您已打卡%s天</string>
+    <string name="add_widget">添加组件</string>
+    <string name="app_widget_description">组件描述</string>
 </resources>

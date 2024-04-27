@@ -39,10 +39,13 @@ class WorkManagerGolalSettingRepository(context: Context) : GoalSettingRepositor
         // 使用唯一的名称来识别这个周期性工作
         val uniqueWorkName = "resettingGoalWork"
 
-        workManager.enqueueUniquePeriodicWork(
+        val enqueueUniquePeriodicWork = workManager.enqueueUniquePeriodicWork(
             uniqueWorkName,
             ExistingPeriodicWorkPolicy.KEEP,
             scheduleBuilder
         )
+        // @todo
+        // 如果重置成功 此事用户正在使用app 需要弹窗提示刷新应用
+
     }
 }
