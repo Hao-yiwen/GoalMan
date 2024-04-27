@@ -172,7 +172,7 @@ fun HomeScreen(viewModel: GoalListViewModel = viewModel(factory = GoalListViewMo
                 modifier = Modifier.padding(vertical = 10.dp),
                 goalUiState.goals,
                 viewModel::updateGoal,
-                viewModel::deleteGoal
+                viewModel::deleteGoal,
             )
             Box(modifier = Modifier.weight(1f)) {
                 BottomContent(
