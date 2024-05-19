@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -35,23 +36,34 @@ fun SplashScreen(onTimeout: () -> Unit) {
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier.fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier.padding(bottom = 80.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(bottom = 90.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Crop,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop,
+                )
+                Text(
+                    text = "目标达人",
+                    color = Color.Black,
+                    style = MaterialTheme.typography.displayLarge,
+                    modifier = Modifier.padding(start = 12.dp)
+                )
+            }
             Text(
-                text = "目标达人",
-                color = Color.Black,
-                style = MaterialTheme.typography.displayLarge,
-                modifier = Modifier.padding(start = 16.dp)
+                text = "成长 先用目标达人",
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 16.dp),
+                color = Color.DarkGray
             )
         }
     }

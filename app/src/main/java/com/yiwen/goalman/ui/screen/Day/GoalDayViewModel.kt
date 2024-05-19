@@ -23,6 +23,7 @@ import com.yiwen.goalman.utils.RecordComplianceRate
 import com.yiwen.goalman.utils.getNowDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -61,6 +62,9 @@ class GoalDayViewModel(
             _uiState.value = _uiState.value.copy(
                 goals = gl
             )
+            // 确保出现lottie动画
+            // @todo 等后续有接口请求了 删除此段延迟
+            delay(200)
             homeViewModel.setLoading(false)
         }
     }
