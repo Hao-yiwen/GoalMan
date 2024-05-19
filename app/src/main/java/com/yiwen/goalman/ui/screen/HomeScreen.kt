@@ -145,12 +145,14 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LottieAnimation(
-                    composition = composition,
-                    progress = progress,
-                    modifier = Modifier.size(100.dp)
-                )
-                Text(text = stringResource(id = R.string.loading))
+                if (composition != null) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = progress,
+                        modifier = Modifier.size(100.dp)
+                    )
+                    Text(text = stringResource(id = R.string.loading))
+                }
             }
         }
     }
