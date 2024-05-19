@@ -1,4 +1,4 @@
-package com.yiwen.goalman.ui.screen
+package com.yiwen.goalman.ui.screen.Day
 
 import android.util.Log
 import androidx.compose.runtime.toMutableStateList
@@ -28,12 +28,12 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class GoalManViewModel(
+class GoalDayViewModel(
     val goalRepositoryProvider: GoalRepository,
     val goalSettingRepository: GoalSettingRepository,
     val completionRecordsReposityProvider: CompletionRecordsRepository
 ) : ViewModel() {
-    val _uiState = MutableStateFlow(GoalManUiState())
+    val _uiState = MutableStateFlow(GoalDayUiState())
 
     val uiState = _uiState.asStateFlow()
 
@@ -244,7 +244,7 @@ class GoalManViewModel(
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GoalApplication)
-                GoalManViewModel(
+                GoalDayViewModel(
                     application.container.goalRepository,
                     application.container.workManagerRepository,
                     application.container.completionRecordsRepository

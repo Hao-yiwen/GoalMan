@@ -1,4 +1,4 @@
-package com.yiwen.goalman.ui.screen
+package com.yiwen.goalman.ui.screen.Day
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,59 +31,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.yiwen.goalman.BuildConfig
 import com.yiwen.goalman.R
+import com.yiwen.goalman.ui.screen.Components.TopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenTopBar(
-    viewModel: GoalManViewModel, goalUiState: GoalManUiState, openDrawerState: () -> Unit
+fun GoalManDayTopBar(
+    viewModel: GoalDayViewModel, goalUiState: GoalDayUiState, openDrawerState: () -> Unit
 ) {
-    val context = LocalContext.current
-    val appContext = context.applicationContext
-
-    CenterAlignedTopAppBar(navigationIcon = {
-        Box(
-            modifier = Modifier.background(Color.Transparent)
-        ) {
-            IconButton(onClick = {
-                openDrawerState()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "菜单",
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-        }
-    },
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                if (BuildConfig.DEBUG) {
-                    Text(
-                        text = stringResource(
-                            id = R.string.title_name, goalUiState.positiveDays
-                        ) + "(DEBUG)",
-                        style = MaterialTheme.typography.displayMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                } else {
-                    Text(
-                        text = stringResource(id = R.string.title_name, goalUiState.positiveDays),
-                        style = MaterialTheme.typography.displayLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-            }
+    TopBar(
+        navigationClick = {
+            openDrawerState()
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(MaterialTheme.colorScheme.primary),
-        actions = {
+        actionScope = {
             Box(
                 modifier = Modifier
                     .background(Color.Transparent)
@@ -98,5 +56,32 @@ fun HomeScreenTopBar(
                             viewModel.checkIn()
                         })
             }
-        })
+        }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (BuildConfig.DEBUG) {
+                Text(
+                    text = stringResource(
+                        id = R.string.title_name, goalUiState.positiveDays
+                    ) + "(DEBUG)",
+                    style = MaterialTheme.typography.displayMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                Text(
+                    text = stringResource(id = R.string.title_name, goalUiState.positiveDays),
+                    style = MaterialTheme.typography.displayLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+        }
+    }
 }
