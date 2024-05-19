@@ -39,10 +39,12 @@ import com.kizitonwose.calendar.compose.heatmapcalendar.rememberHeatMapCalendarS
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.core.yearMonth
 import com.yiwen.goalman.Enum.Level
+import com.yiwen.goalman.GoalApplication
 import com.yiwen.goalman.ui.screen.BottomContent
 import com.yiwen.goalman.ui.screen.Calendar.Day
 import com.yiwen.goalman.ui.screen.Calendar.MonthHeader
 import com.yiwen.goalman.ui.screen.Calendar.WeekHeader
+import com.yiwen.goalman.ui.screen.HomeViewModel
 import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -51,9 +53,19 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalManDay(
-    viewModel: GoalDayViewModel = viewModel(factory = GoalDayViewModel.factory),
+    homeModel: HomeViewModel,
     openDrawerState: () -> Unit
 ) {
+    val AppContext = (LocalContext.current.applicationContext as GoalApplication)
+    val factory = remember {
+        GoalDayViewModel.provideFactory(
+            homeModel = homeModel,
+            goalRepository = AppContext.container.goalRepository,
+            workManagerRepository = AppContext.container.workManagerRepository,
+            completionRecordsRepository = AppContext.container.completionRecordsRepository
+        )
+    }
+    val viewModel: GoalDayViewModel = viewModel(factory = factory)
     val goalUiState by viewModel.uiState.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
@@ -74,7 +86,7 @@ fun GoalManDay(
 //    val data = remember { mutableStateOf<Map<LocalDate, Level>>(emptyMap()) }
     var selection by remember { mutableStateOf<Pair<LocalDate, Level>?>(null) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = Unit) {
         requestPermissons(context = appContext, activityContext = context)
         viewModel.reSettingGoal()
     }

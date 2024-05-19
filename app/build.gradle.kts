@@ -88,6 +88,13 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("androidx.compose.foundation:foundation-android")
 
+    // Houses the core logic for charts and other elements. Included in all other modules.
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.19")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.19")
+    // lottie animation compose
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
