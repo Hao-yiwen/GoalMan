@@ -86,6 +86,7 @@ dependencies {
 
     // workManager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.compose.foundation:foundation-android")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

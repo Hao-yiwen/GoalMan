@@ -1,12 +1,11 @@
 package com.yiwen.goalman.ui.screen
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.mutableStateOf
 import com.yiwen.goalman.Enum.Level
 import com.yiwen.goalman.model.Goal
 import java.time.LocalDate
 
-data class GoalListUiState(
+data class GoalManUiState(
     val goals: List<Goal> = emptyList(),
     val snackbarHostState: SnackbarHostState = SnackbarHostState(),
     val date: MutableMap<LocalDate, Level> = mutableMapOf(),
