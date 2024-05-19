@@ -13,32 +13,27 @@ import com.yiwen.goalman.Enum.Level
 import com.yiwen.goalman.GOAL_PERCENTAGE
 import com.yiwen.goalman.GoalApplication
 import com.yiwen.goalman.data.CompletionRecordsRepository
-import com.yiwen.goalman.data.CompletionRecordsReposityProvider
 import com.yiwen.goalman.data.GoalRepository
-import com.yiwen.goalman.data.GoalRepositoryProvider
 import com.yiwen.goalman.data.GoalSettingRepository
 import com.yiwen.goalman.model.CompletionRecord
 import com.yiwen.goalman.model.Goal
 import com.yiwen.goalman.utils.RecordComplianceRate
 import com.yiwen.goalman.utils.getNowDate
-import com.yiwen.goalman.work.requestPermissons
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.sql.Date
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class GoalListViewModel(
+class GoalManViewModel(
     val goalRepositoryProvider: GoalRepository,
     val goalSettingRepository: GoalSettingRepository,
     val completionRecordsReposityProvider: CompletionRecordsRepository
 ) : ViewModel() {
-    val _uiState = MutableStateFlow(GoalListUiState())
+    val _uiState = MutableStateFlow(GoalManUiState())
 
     val uiState = _uiState.asStateFlow()
 
@@ -249,7 +244,7 @@ class GoalListViewModel(
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GoalApplication)
-                GoalListViewModel(
+                GoalManViewModel(
                     application.container.goalRepository,
                     application.container.workManagerRepository,
                     application.container.completionRecordsRepository

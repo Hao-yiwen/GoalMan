@@ -34,4 +34,11 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.sp
     ),
+    bodyLarge = TextStyle(
+        fontFamily = MaShanZhengFont,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
 )
