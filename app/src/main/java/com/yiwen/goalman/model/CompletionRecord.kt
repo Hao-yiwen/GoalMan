@@ -27,6 +27,7 @@ data class CompletionRecord(
     @NotNull val completionTime: String,
     // @description 1表示未完成 2表示完成
     @NotNull val status: Int,
+    // 记录这是那一周
 )
 
 fun main() {

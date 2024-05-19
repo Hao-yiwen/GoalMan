@@ -1,4 +1,4 @@
-package com.yiwen.goalman.ui.screen
+package com.yiwen.goalman.ui.screen.Day
 
 import android.util.Log
 import androidx.compose.runtime.toMutableStateList
@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.yiwen.goalman.Enum.GoalStatus
@@ -17,6 +18,7 @@ import com.yiwen.goalman.data.GoalRepository
 import com.yiwen.goalman.data.GoalSettingRepository
 import com.yiwen.goalman.model.CompletionRecord
 import com.yiwen.goalman.model.Goal
+import com.yiwen.goalman.ui.screen.HomeViewModel
 import com.yiwen.goalman.utils.RecordComplianceRate
 import com.yiwen.goalman.utils.getNowDate
 import kotlinx.coroutines.Dispatchers
@@ -28,23 +30,27 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class GoalManViewModel(
+class GoalDayViewModel(
+    val homeViewModel: HomeViewModel,
     val goalRepositoryProvider: GoalRepository,
     val goalSettingRepository: GoalSettingRepository,
     val completionRecordsReposityProvider: CompletionRecordsRepository
 ) : ViewModel() {
-    val _uiState = MutableStateFlow(GoalManUiState())
+    val _uiState = MutableStateFlow(GoalDayUiState())
 
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            // 获取目标列表
-            processGoalList()
-            // 获取已打卡天数
-            getPositiveDays()
-            // 获取热力图数据
-            getHeatMapCalendarData()
+            try {
+                // 获取目标列表
+                processGoalList()
+                // 获取已打卡天数
+                getPositiveDays()
+                // 获取热力图数据
+                getHeatMapCalendarData()
+            } finally {
+            }
         }
     }
 
@@ -55,6 +61,7 @@ class GoalManViewModel(
             _uiState.value = _uiState.value.copy(
                 goals = gl
             )
+            homeViewModel.setLoading(false)
         }
     }
 
@@ -110,8 +117,7 @@ class GoalManViewModel(
             val endDate = _uiState.value.endDate
             val results = mutableMapOf<LocalDate, Level>()
             val records = completionRecordsReposityProvider.getCompletionRecordsByDateRange(
-                getNowDate(startDate),
-                getNowDate(endDate)
+                getNowDate(startDate), getNowDate(endDate)
             ).groupBy { it.completionTime }
 
             // 假设 records 是 Map<LocalDate, List<Record>>
@@ -197,34 +203,30 @@ class GoalManViewModel(
                             }
                         }
                         getHeatMapCalendarData()
-                        _uiState.value = _uiState.value.copy(
-                            snackbarHostState = _uiState.value.snackbarHostState.apply {
+                        _uiState.value =
+                            _uiState.value.copy(snackbarHostState = _uiState.value.snackbarHostState.apply {
                                 showSnackbar("更新打卡成功~")
-                            }
-                        )
+                            })
                     } else {
                         completionRecordsReposityProvider.insertAll(*completionRecords.toTypedArray())
                         getHeatMapCalendarData()
-                        _uiState.value = _uiState.value.copy(
-                            snackbarHostState = _uiState.value.snackbarHostState.apply {
+                        _uiState.value =
+                            _uiState.value.copy(snackbarHostState = _uiState.value.snackbarHostState.apply {
                                 showSnackbar("打卡成功~")
-                            }
-                        )
+                            })
                     }
                 } else if (!positivieGoals) {
-                    _uiState.value = _uiState.value.copy(
-                        snackbarHostState = _uiState.value.snackbarHostState.apply {
+                    _uiState.value =
+                        _uiState.value.copy(snackbarHostState = _uiState.value.snackbarHostState.apply {
                             showSnackbar("未完成当日目标的${GOAL_PERCENTAGE * 100}%以上,无法完成打卡")
-                        }
-                    )
+                        })
                 }
             } else {
                 Log.d("GoalListViewModel", "currentGoals:" + currentGoals.toString())
-                _uiState.value = _uiState.value.copy(
-                    snackbarHostState = _uiState.value.snackbarHostState.apply {
+                _uiState.value =
+                    _uiState.value.copy(snackbarHostState = _uiState.value.snackbarHostState.apply {
                         showSnackbar("还没有设置目标哦~")
-                    }
-                )
+                    })
             }
         }
     }
@@ -241,14 +243,22 @@ class GoalManViewModel(
 
 
     companion object {
-        val factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as GoalApplication)
-                GoalManViewModel(
-                    application.container.goalRepository,
-                    application.container.workManagerRepository,
-                    application.container.completionRecordsRepository
-                )
+        fun provideFactory(
+            homeModel: HomeViewModel,
+            goalRepository: GoalRepository,
+            workManagerRepository: GoalSettingRepository,
+            completionRecordsRepository: CompletionRecordsRepository
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                if (modelClass.isAssignableFrom(GoalDayViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST") return GoalDayViewModel(
+                        homeModel,
+                        goalRepository,
+                        workManagerRepository,
+                        completionRecordsRepository
+                    ) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
             }
         }
     }

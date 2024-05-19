@@ -9,4 +9,6 @@
     <string name="add_widget">添加组件</string>
     <string name="app_widget_description">组件描述</string>
     <string name="delete">删除</string>
+    <string name="wekky_goal">前八周的打卡情况</string>
+    <string name="loading">加载中...</string>
 </resources>
