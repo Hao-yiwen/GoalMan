@@ -4,6 +4,8 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.0-1.0.13"
 }
 
+apply(file("${rootProject.rootDir}/gradle/build_debug.gradle"))
+
 android {
     namespace = "com.yiwen.goalman"
     compileSdk = 34
