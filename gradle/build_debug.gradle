@@ -1,0 +1,8 @@
+
+tasks.register("debugAssembleDebug"){
+    dependsOn("assembleDebug")
+    doLast {
+        println("Debugging assembleDebug task...")
+        println("heihei~")
+    }
+}
