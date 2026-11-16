@@ -1,12 +1,12 @@
 package com.yiwen.goalman.ui.screen.Week
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,44 +14,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.wear.compose.material.Text
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.core.cartesian.axis.AxisItemPlacer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.yiwen.goalman.R
 import com.yiwen.goalman.ui.screen.Components.TopBar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
 import kotlin.random.Random
-import kotlinx.coroutines.delay
 
 @Composable
 fun GoalManWeek(openDrawerState: () -> Unit) {
-    val modelProducer = remember { CartesianChartModelProducer.build() }
+    val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.Default) {
-            modelProducer.tryRunTransaction {
-                columnSeries {
-                    repeat(3) {
-                        series(
-                            List(Defaults.ENTRY_COUNT) {
-                                Defaults.COLUMN_LAYER_MIN_Y +
-                                        Random.nextFloat() * Defaults.COLUMN_LAYER_RELATIVE_MAX_Y
-                            },
-                        )
-                    }
+        modelProducer.runTransaction {
+            columnModel {
+                repeat(3) {
+                    series(
+                        List(Defaults.ENTRY_COUNT) {
+                            Defaults.COLUMN_LAYER_MIN_Y +
+                                    Random.nextFloat() * Defaults.COLUMN_LAYER_RELATIVE_MAX_Y
+                        },
+                    )
                 }
             }
         }
@@ -75,36 +67,36 @@ fun GoalManWeek(openDrawerState: () -> Unit) {
                     columnProvider =
                     ColumnCartesianLayer.ColumnProvider.series(
                         rememberLineComponent(
-                            color = color1,
+                            fill = Fill(color1),
                             thickness = 10.dp,
-                            shape =
-                            Shape.rounded(
-                                bottomLeftPercent = 40,
-                                bottomRightPercent = 40,
+                            shape = RoundedCornerShape(
+                                bottomStartPercent = 40,
+                                bottomEndPercent = 40,
                             ),
                         ),
                         rememberLineComponent(
-                            color = color2,
+                            fill = Fill(color2),
                             thickness = 10.dp,
                         ),
                         rememberLineComponent(
-                            color = color3,
+                            fill = Fill(color3),
                             thickness = 10.dp,
-                            shape =
-                            Shape.rounded(
-                                topLeftPercent = 40,
-                                topRightPercent = 40,
+                            shape = RoundedCornerShape(
+                                topStartPercent = 40,
+                                topEndPercent = 40,
                             ),
                         ),
                     ),
                     mergeMode = { ColumnCartesianLayer.MergeMode.Stacked },
                 ),
                 startAxis =
-                rememberStartAxis(
+                VerticalAxis.rememberStart(
                     itemPlacer = startAxisItemPlacer,
                     labelRotationDegrees = AXIS_LABEL_ROTATION_DEGREES,
                 ),
-                bottomAxis = rememberBottomAxis(labelRotationDegrees = AXIS_LABEL_ROTATION_DEGREES),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    labelRotationDegrees = AXIS_LABEL_ROTATION_DEGREES,
+                ),
             ),
             modelProducer = modelProducer,
             modifier = Modifier
@@ -112,10 +104,8 @@ fun GoalManWeek(openDrawerState: () -> Unit) {
                 .fillMaxWidth()
                 .height(200.dp)
                 .padding(16.dp),
-            // @todo 触摸时候显示坐标
-            marker = null,
-            runInitialAnimation = false,
             zoomState = rememberVicoZoomState(zoomEnabled = false),
+            initialAnimationSpec = null,
         )
     }
 }
@@ -123,7 +113,7 @@ fun GoalManWeek(openDrawerState: () -> Unit) {
 private val color1 = Color(0xff6438a7)
 private val color2 = Color(0xff3490de)
 private val color3 = Color(0xff73e8dc)
-private val startAxisItemPlacer = AxisItemPlacer.Vertical.count({ 3 })
+private val startAxisItemPlacer = VerticalAxis.ItemPlacer.count({ 3 })
 private const val AXIS_LABEL_ROTATION_DEGREES = 0f
 
 object Defaults {

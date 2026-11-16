@@ -148,7 +148,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                 if (composition != null) {
                     LottieAnimation(
                         composition = composition,
-                        progress = progress,
+                        progress = { progress },
                         modifier = Modifier.size(100.dp)
                     )
                     Text(text = stringResource(id = R.string.loading))

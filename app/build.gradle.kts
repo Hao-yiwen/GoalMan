@@ -1,23 +1,21 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
 }
 
 apply(file("${rootProject.rootDir}/gradle/build_debug.gradle"))
 
 android {
     namespace = "com.yiwen.goalman"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.yiwen.goalman"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
-        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -39,21 +37,13 @@ android {
         }
     }
     compileOptions {
-        // Enable support for the new language APIs
-//        coreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
         buildConfig = true
         viewBinding = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -66,36 +56,29 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.wear.compose.material)
 
-    //Room
-    implementation("androidx.room:room-runtime:${rootProject.extra["room_version"]}")
-    ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
-    implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${libs.versions.lifecycleRuntimeKtx}")
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.preferences)
 
-    // calendar
-    implementation("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation("com.kizitonwose.calendar:compose:2.5.0")
+    implementation(libs.desugar.jdk.libs)
+    implementation(libs.calendar.compose)
 
-    // workManager
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("androidx.compose.foundation:foundation-android")
+    implementation(libs.androidx.work.runtime.ktx)
 
-    // Houses the core logic for charts and other elements. Included in all other modules.
-    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.19")
-    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.19")
-    // lottie animation compose
-    implementation("com.airbnb.android:lottie-compose:6.4.0")
-
+    implementation(libs.vico.compose)
+    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
