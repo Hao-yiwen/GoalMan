@@ -1,6 +1,6 @@
 # 目标达人 App
 
-![Gradle](https://img.shields.io/badge/gradle-8.4-02303A.svg)
+![Gradle](https://img.shields.io/badge/gradle-9.6-02303A.svg)
 ![Compose](https://img.shields.io/badge/compose-used-6200EA.svg)
 
 ## 二维码
